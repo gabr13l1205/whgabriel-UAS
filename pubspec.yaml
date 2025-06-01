@@ -8,6 +8,7 @@ environment:
   # sdk: ^3.8.0
 
 dependencies:
+  timeago: ^3.5.0
   flutter:
     sdk: flutter
   google_fonts: ^6.2.1
@@ -20,4 +21,8 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - assets/json_data_chat_dosen/dosen_chat.json
     - assets/gambar_dosen/
+    - assets/mahasiswa/
+
+  

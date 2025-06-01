@@ -1,8 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:whazlansaja/models/dosen_model.dart';
 import 'package:whazlansaja/data_saya.dart';
 
-class PesanScreen extends StatelessWidget {
-  const PesanScreen({super.key});
+class PesanScreen extends StatefulWidget {
+  final Dosen dosen;
+  const PesanScreen({super.key, required this.dosen});
+
+  @override
+  State<PesanScreen> createState() => _PesanScreenState();
+}
+
+class _PesanScreenState extends State<PesanScreen> {
+  final TextEditingController _pesanController = TextEditingController();
+
+  void kirimPesan() {
+    final isiPesan = _pesanController.text.trim();
+    if (isiPesan.isEmpty) return;
+
+    setState(() {
+      widget.dosen.historiChat.add(HistoriChat(alur: 1, pesan: isiPesan));
+      _pesanController.clear();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,50 +32,41 @@ class PesanScreen extends StatelessWidget {
       appBar: AppBar(
         leadingWidth: 29,
         elevation: 2,
-        title: const ListTile(
-          contentPadding: EdgeInsets.all(0),
+        title: ListTile(
+          contentPadding: EdgeInsets.zero,
           leading: CircleAvatar(
-            backgroundImage:
-                AssetImage('assets/gambar_dosen/Azlan, S.Kom., M.Kom.jpg'),
+            backgroundImage: AssetImage(widget.dosen.gambar),
             radius: 16,
           ),
-          title: Text(
-            'Azlan, S.Kom., M.Kom',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          subtitle: Text('06.30'),
+          title:
+              Text(widget.dosen.nama, maxLines: 1, overflow: TextOverflow.ellipsis),
+          subtitle: const Text('Online'),
         ),
-        actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.video_call)),
-          IconButton(onPressed: () {}, icon: const Icon(Icons.call)),
-          IconButton(onPressed: () {}, icon: const Icon(Icons.more_vert)),
+        actions: const [
+          IconButton(onPressed: null, icon: Icon(Icons.video_call)),
+          IconButton(onPressed: null, icon: Icon(Icons.call)),
+          IconButton(onPressed: null, icon: Icon(Icons.more_vert)),
         ],
       ),
       body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
             child: ListView.builder(
-              itemCount: 5,
+              itemCount: widget.dosen.historiChat.length,
               itemBuilder: (context, index) {
-                final isDosen = index % 2 == 0;
+                final chat = widget.dosen.historiChat[index];
+                final isDosen = chat.alur == 0;
 
                 return Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 8,
-                    horizontal: 12,
-                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                   child: Row(
-                    mainAxisAlignment: isDosen
-                        ? MainAxisAlignment.start
-                        : MainAxisAlignment.end,
+                    mainAxisAlignment:
+                        isDosen ? MainAxisAlignment.start : MainAxisAlignment.end,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       if (isDosen)
-                        const CircleAvatar(
-                          backgroundImage: AssetImage(
-                              'assets/gambar_dosen/Azlan, S.Kom., M.Kom.jpg'),
+                        CircleAvatar(
+                          backgroundImage: AssetImage(widget.dosen.gambar),
                           radius: 14,
                         ),
                       Flexible(
@@ -73,12 +83,14 @@ class PesanScreen extends StatelessWidget {
                             borderRadius: BorderRadius.only(
                               topLeft: const Radius.circular(12),
                               topRight: const Radius.circular(12),
-                              bottomLeft: Radius.circular(isDosen ? 0 : 12),
-                              bottomRight: Radius.circular(isDosen ? 12 : 0),
+                              bottomLeft:
+                                  Radius.circular(isDosen ? 0 : 12),
+                              bottomRight:
+                                  Radius.circular(isDosen ? 12 : 0),
                             ),
                           ),
                           child: Text(
-                            'index ke-$index ini adalah contoh chat. Silahkan ambil data chat dari file json.',
+                            chat.pesan,
                             style: TextStyle(
                               fontSize: 15,
                               color: isDosen
@@ -90,9 +102,7 @@ class PesanScreen extends StatelessWidget {
                       ),
                       if (!isDosen)
                         CircleAvatar(
-                          backgroundImage: AssetImage(
-                            DataSaya.gambar,
-                          ),
+                          backgroundImage: AssetImage(DataSaya.gambar),
                           radius: 14,
                         ),
                     ],
@@ -103,15 +113,25 @@ class PesanScreen extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.all(12),
-            child: TextFormField(
-              minLines: 1,
-              maxLines: 3,
-              decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.emoji_emotions),
-                suffixIcon: Icon(Icons.send),
-                hintText: 'Ketikkan pesan',
-                filled: true,
-              ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _pesanController,
+                    minLines: 1,
+                    maxLines: 3,
+                    decoration: const InputDecoration(
+                      prefixIcon: Icon(Icons.emoji_emotions),
+                      hintText: 'Ketikkan pesan',
+                      filled: true,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.send),
+                  onPressed: kirimPesan,
+                ),
+              ],
             ),
           ),
         ],
